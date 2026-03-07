@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TönAI — Decode The Signal</title>
+  <meta name="description" content="TönAI uses AI-driven phenomapping for practical human signal insight." />
+  <style>
+    :root {
+      --bg: #08101b;
+      --panel: rgba(8, 16, 27, 0.72);
+      --panel-soft: rgba(255, 255, 255, 0.04);
+      --text: #f3eee7;
+      --muted: #d7cab9;
+      --line: rgba(231, 194, 131, 0.35);
+      --gold: #d6a15d;
+      --gold-soft: #f0d5ae;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --max: 1200px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+
+    .site-shell {
+      min-height: 100vh;
+      background:
+        linear-gradient(to bottom, rgba(5, 9, 16, 0.2), rgba(5, 9, 16, 0.65)),
+        url('hero-image.png') center center / cover no-repeat;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .site-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 211, 147, 0.18), transparent 32%),
+        linear-gradient(to right, rgba(4, 8, 15, 0.82), rgba(4, 8, 15, 0.18) 48%, rgba(4, 8, 15, 0.16) 100%);
+      pointer-events: none;
+    }
+
+    .site-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(5, 8, 13, 0.18), rgba(5, 8, 13, 0.3) 45%, rgba(5, 8, 13, 0.88) 100%);
+      pointer-events: none;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    header {
+      padding: 26px 0 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 42px;
+    }
+
+    .brand-mini {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.35rem;
+      letter-spacing: 0.04em;
+      color: var(--gold-soft);
+      text-shadow: 0 0 18px rgba(214, 161, 93, 0.18);
+    }
+
+    nav {
+      display: flex;
+      gap: clamp(22px, 5vw, 54px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    nav a {
+      font-size: 0.95rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(243, 238, 231, 0.94);
+      transition: color 0.25s ease, opacity 0.25s ease;
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+      color: var(--gold-soft);
+      outline: none;
+    }
+
+    .nav-line {
+      margin-top: 18px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(231, 194, 131, 0.26) 10%, rgba(231, 194, 131, 0.62) 50%, rgba(231, 194, 131, 0.26) 90%, transparent);
+      position: relative;
+    }
+
+    .nav-line::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 96px;
+      height: 2px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255, 209, 143, 0.95) 0%, rgba(255, 209, 143, 0.12) 70%, transparent 100%);
+      filter: blur(0.2px);
+    }
+
+    .hero {
+      min-height: calc(100vh - 88px);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: clamp(52px, 10vw, 110px) 0 110px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      width: min(100%, 900px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .lockup {
+      width: 100%;
+      padding: 0 10px;
+      text-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+    }
+
+    .wordmark {
+      margin: 0;
+      font-weight: 500;
+      font-size: clamp(4.8rem, 12vw, 8.6rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      color: #f1ece5;
+    }
+
+    .wordmark .gold {
+      color: var(--gold);
+    }
+
+    .tagline-row {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .tagline-line {
+      width: clamp(48px, 12vw, 112px);
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(248, 213, 157, 0.9), transparent);
+      box-shadow: 0 0 18px rgba(214, 161, 93, 0.22);
+    }
+
+    .tagline {
+      margin: 0;
+      font-size: clamp(1.3rem, 3vw, 2.2rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 400;
+      color: var(--gold-soft);
+    }
+
+    .hero-glow {
+      width: min(100%, 620px);
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(255, 221, 176, 0.9), transparent);
+      box-shadow: 0 0 28px rgba(214, 161, 93, 0.35);
+      opacity: 0.9;
+    }
+
+    .hero-copy {
+      max-width: 620px;
+      margin-top: 4px;
+      font-size: clamp(1rem, 2vw, 1.12rem);
+      color: rgba(245, 236, 227, 0.9);
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(to bottom, rgba(6, 10, 17, 0.95), #07111c 15%, #08111d 100%);
+    }
+
+    section {
+      scroll-margin-top: 100px;
+      padding: 84px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.02;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .section-copy {
+      max-width: 700px;
+      color: rgba(243, 238, 231, 0.82);
+      font-size: 1.05rem;
+    }
+
+    .science-grid,
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+    }
+
+    .panel h3 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      color: var(--gold-soft);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .panel p,
+    .panel li {
+      color: rgba(243, 238, 231, 0.82);
+      font-size: 0.98rem;
+    }
+
+    .platform-wrap {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .steps {
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .step:last-child { border-bottom: 0; }
+
+    .step-number {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--gold-soft);
+      border: 1px solid rgba(231, 194, 131, 0.35);
+      background: rgba(255,255,255,0.02);
+      font-weight: 700;
+    }
+
+    .step h3 {
+      margin: 2px 0 6px;
+      font-size: 1.08rem;
+    }
+
+    .signal-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .signal-card::before,
+    .signal-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -30% auto -30%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(255, 214, 162, 0.85), rgba(115, 183, 222, 0.55), transparent);
+      box-shadow: 0 0 18px rgba(255, 212, 153, 0.25);
+    }
+
+    .signal-card::before {
+      top: 42%;
+      transform: rotate(-7deg);
+    }
+
+    .signal-card::after {
+      top: 57%;
+      transform: rotate(6deg);
+    }
+
+    .signal-orb {
+      width: 118px;
+      height: 118px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(231, 194, 131, 0.25);
+      background:
+        radial-gradient(circle at 40% 35%, rgba(255, 213, 154, 0.95), rgba(255, 213, 154, 0.12) 28%, transparent 50%),
+        radial-gradient(circle at 68% 58%, rgba(112, 188, 228, 0.58), rgba(112, 188, 228, 0.08) 22%, transparent 40%),
+        rgba(255,255,255,0.02);
+      box-shadow: inset 0 0 40px rgba(255,255,255,0.03), 0 0 40px rgba(214, 161, 93, 0.08);
+    }
+
+    .signal-card h3,
+    .signal-card p {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    footer {
+      padding: 28px 0 42px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      background: #07101a;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      color: rgba(243, 238, 231, 0.78);
+      font-size: 0.96rem;
+    }
+
+    .footer-mark {
+      color: var(--gold-soft);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 980px) {
+      .science-grid,
+      .apps-grid,
+      .platform-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-mini {
+        position: static;
+        transform: none;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 16px;
+      }
+
+      .topbar {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        width: min(calc(100% - 28px), var(--max));
+      }
+
+      header {
+        padding-top: 18px;
+      }
+
+      nav {
+        gap: 16px 20px;
+      }
+
+      nav a {
+        font-size: 0.82rem;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 54px 0 72px;
+      }
+
+      .tagline-row {
+        gap: 10px;
+      }
+
+      .tagline {
+        letter-spacing: 0.12em;
+      }
+
+      section {
+        padding: 64px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-shell" id="home">
+    <header>
+      <div class="container">
+        <div class="topbar">
+          <a class="brand-mini" href="#home">TönAI</a>
+          <nav aria-label="Primary">
+            <a href="#science">Science</a>
+            <a href="#platform">Platform</a>
+            <a href="#applications">Applications</a>
+            <a href="#home">Home</a>
+          </nav>
+        </div>
+        <div class="nav-line" aria-hidden="true"></div>
+      </div>
+    </header>
+
+    <main class="hero">
+      <div class="container hero-inner">
+        <div class="lockup">
+          <h1 class="wordmark"><span class="gold">Tö</span>nAI</h1>
+          <div class="tagline-row" aria-hidden="true">
+            <span class="tagline-line"></span>
+            <p class="tagline">Decode The Signal</p>
+            <span class="tagline-line"></span>
+          </div>
+        </div>
+        <div class="hero-glow" aria-hidden="true"></div>
+        <p class="hero-copy">AI-driven phenomapping for practical human signal insight.</p>
+      </div>
+    </main>
+  </div>
+
+  <div class="content">
+    <section id="science">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Science</p>
+          <h2>Simple science. Practical signal insight.</h2>
+          <p class="section-copy">TönAI introduces Tonal Informatics in plain language: using patterned human signals to uncover hidden health, performance, and research insights that are often missed by broad categories alone.</p>
+        </div>
+
+        <div class="science-grid">
+          <article class="panel">
+            <h3>Tonal Informatics</h3>
+            <p>A practical framework for reading human signal patterns across physiology, behavior, and response.</p>
+          </article>
+          <article class="panel">
+            <h3>Phenomapping</h3>
+            <p>AI groups similar signal patterns into useful clusters so insight becomes more specific and more actionable.</p>
+          </article>
+          <article class="panel">
+            <h3>Clearer interpretation</h3>
+            <p>The goal is simple: better insight, earlier visibility, and more personalized next steps.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="platform">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Platform</p>
+          <h2>Designed to move from signal capture to usable output.</h2>
+          <p class="section-copy">The platform section should feel operational, not abstract — a clean sequence that shows how TönAI turns raw inputs into a practical profile.</p>
+        </div>
+
+        <div class="platform-wrap">
+          <article class="panel">
+            <div class="steps">
+              <div class="step">
+                <div class="step-number">01</div>
+                <div>
+                  <h3>BASECASE</h3>
+                  <p>Establish a structured starting point for signal evaluation.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-number">02</div>
+                <div>
+                  <h3>Signal capture</h3>
+                  <p>Collect relevant inputs across voice, physiology, and other defined channels.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-number">03</div>
+                <div>
+                  <h3>AI phenomapping</h3>
+                  <p>Identify meaningful patterns and cluster signals into more useful groupings.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-number">04</div>
+                <div>
+                  <h3>Personal Resonance Profile</h3>
+                  <p>Deliver a simplified output that helps guide interpretation and next action.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <aside class="panel signal-card">
+            <div class="signal-orb" aria-hidden="true"></div>
+            <h3>Signal-to-profile architecture</h3>
+            <p>Clean, modular, and easy to explain — built for practical use across research and applied environments.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="applications">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Applications</p>
+          <h2>Built for real-world use.</h2>
+          <p class="section-copy">Keep applications simple and concrete. Show where the platform can create earlier detection, better interpretation, and more personalized guidance.</p>
+        </div>
+
+        <div class="apps-grid">
+          <article class="panel">
+            <h3>Clinical medicine</h3>
+            <p>Support better interpretation of hidden patient patterns and variation in response.</p>
+          </article>
+          <article class="panel">
+            <h3>Scientific research</h3>
+            <p>Use signal-based clustering to explore new subgroups and more targeted questions.</p>
+          </article>
+          <article class="panel">
+            <h3>Human performance</h3>
+            <p>Translate complex signals into practical insight for readiness, recovery, and performance context.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container footer-row">
+        <div class="footer-links">
+          <a href="#home">Home</a>
+          <a href="#science">Science</a>
+          <a href="#platform">Platform</a>
+          <a href="#applications">Applications</a>
+        </div>
+        <div class="footer-mark">The Signal Remains</div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
